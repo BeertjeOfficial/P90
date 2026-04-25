@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raw — offsets.hpp</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'DM Mono', monospace;
+            background: #0c0c0c;
+            color: #c9c9c9;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        #toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 20px;
+            background: #0f0f0f;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            color: #444;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: #c0392b; }
+        .back-link svg { width: 11px; height: 11px; }
+
+        .toolbar-divider { width: 1px; height: 12px; background: rgba(255,255,255,0.06); }
+
+        .toolbar-filename {
+            font-size: 11px;
+            color: #333;
+        }
+
+        .toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #line-count {
+            font-size: 10px;
+            color: #2a2a2a;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-family: 'DM Mono', monospace;
+            font-size: 10px;
+            color: #444;
+            background: #141414;
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 5px;
+            padding: 5px 12px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: color 0.2s, border-color 0.2s;
+        }
+        .btn:hover { color: #efefef; border-color: rgba(255,255,255,0.15); }
+        .btn.copied { color: #2ecc71; border-color: rgba(46,204,113,0.3); }
+
+        #raw-content {
+            display: block;
+            padding: 24px 20px;
+            white-space: pre;
+            tab-size: 4;
+            min-height: calc(100vh - 40px);
+        }
+
+        .state-msg {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            height: 200px;
+            color: #333;
+            font-size: 12px;
+        }
+        .spinner {
+            width: 13px;
+            height: 13px;
+            border: 1.5px solid #222;
+            border-top-color: #555;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div id="toolbar">
+        <div class="toolbar-left">
+            <a class="back-link" href="offsets.html">
+                <svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 2L4 6L8 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                offsets.hpp
+            </a>
+            <span class="toolbar-divider"></span>
+            <span class="toolbar-filename">offsets.hpp — raw</span>
+        </div>
+        <div class="toolbar-right">
+            <span id="line-count"></span>
+            <button class="btn" id="copy-btn" onclick="copyRaw()">
+                <svg width="10" height="10" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="4" y="4" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.2"/>
+                    <path d="M3 8H2C1.44772 8 1 7.55228 1 7V2C1 1.44772 1.44772 1 2 1H7C7.55228 1 8 1.44772 8 2V3" stroke="currentColor" stroke-width="1.2"/>
+                </svg>
+                Copy
+            </button>
+        </div>
+    </div>
+
+    <pre id="raw-content"><div class="state-msg"><div class="spinner"></div>Loading…</div></pre>
+
+    <script>
+        const SOURCE = 'https://corsproxy.io/?url=https://offsets.ntgetwritewatch.workers.dev/offsets.hpp';
+        let rawContent = '';
+
+        function escapeHtml(str) {
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+
+        async function load() {
+            try {
+                const res = await fetch(SOURCE);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                rawContent = await res.text();
+                document.getElementById('raw-content').textContent = rawContent;
+                const lines = rawContent.split('\n').length;
+                document.getElementById('line-count').textContent = `${lines} lines`;
+            } catch (err) {
+                document.getElementById('raw-content').innerHTML =
+                    `<div class="state-msg" style="color:#555;">Failed to load — ${escapeHtml(err.message)}</div>`;
+            }
+        }
+
+        function copyRaw() {
+            if (!rawContent) return;
+            navigator.clipboard.writeText(rawContent).then(() => {
+                const btn = document.getElementById('copy-btn');
+                btn.textContent = 'Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.innerHTML = `<svg width="10" height="10" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="4" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M3 8H2C1.44772 8 1 7.55228 1 7V2C1 1.44772 1.44772 1 2 1H7C7.55228 1 8 1.44772 8 2V3" stroke="currentColor" stroke-width="1.2"/></svg> Copy`;
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        load();
+    </script>
+
+</body>
+</html>
