@@ -29,7 +29,6 @@
             padding: 60px 24px;
         }
 
-        /* ── Back nav ── */
         .nav {
             width: 100%;
             max-width: 900px;
@@ -49,7 +48,6 @@
         .nav a:hover { color: var(--red); }
         .nav a svg { width: 12px; height: 12px; }
 
-        /* ── Header ── */
         .header {
             width: 100%;
             max-width: 900px;
@@ -96,7 +94,7 @@
             gap: 10px;
         }
 
-        .btn-copy {
+        .btn {
             display: inline-flex;
             align-items: center;
             gap: 6px;
@@ -108,10 +106,11 @@
             border-radius: 6px;
             padding: 6px 14px;
             cursor: pointer;
+            text-decoration: none;
             transition: color 0.2s, border-color 0.2s;
         }
-        .btn-copy:hover { color: var(--white); border-color: rgba(255,255,255,0.15); }
-        .btn-copy.copied { color: #2ecc71; border-color: rgba(46,204,113,0.3); }
+        .btn:hover { color: var(--white); border-color: rgba(255,255,255,0.15); }
+        .btn.copied { color: #2ecc71; border-color: rgba(46,204,113,0.3); }
 
         .status-pill {
             display: inline-flex;
@@ -132,10 +131,9 @@
             background: #555;
             transition: background 0.3s;
         }
-        .status-dot.live   { background: #2ecc71; box-shadow: 0 0 0 2px rgba(46,204,113,0.2); }
-        .status-dot.error  { background: #e74c3c; }
+        .status-dot.live  { background: #2ecc71; box-shadow: 0 0 0 2px rgba(46,204,113,0.2); }
+        .status-dot.error { background: #e74c3c; }
 
-        /* ── Code viewer ── */
         .viewer-wrap {
             width: 100%;
             max-width: 900px;
@@ -155,16 +153,8 @@
             border-bottom: 1px solid var(--border);
         }
 
-        .viewer-dots {
-            display: flex;
-            gap: 6px;
-        }
-        .viewer-dots span {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #222;
-        }
+        .viewer-dots { display: flex; gap: 6px; }
+        .viewer-dots span { width: 10px; height: 10px; border-radius: 50%; background: #222; }
 
         .viewer-meta {
             font-family: 'DM Mono', monospace;
@@ -173,10 +163,7 @@
             letter-spacing: 0.04em;
         }
 
-        #code-container {
-            position: relative;
-            overflow-x: auto;
-        }
+        #code-container { position: relative; overflow-x: auto; }
 
         #code-block {
             display: block;
@@ -190,11 +177,7 @@
             tab-size: 4;
         }
 
-        /* Line numbers layout */
-        .code-line {
-            display: flex;
-            align-items: baseline;
-        }
+        .code-line { display: flex; align-items: baseline; }
         .line-num {
             user-select: none;
             min-width: 52px;
@@ -203,21 +186,16 @@
             text-align: right;
             flex-shrink: 0;
         }
-        .line-body {
-            padding-right: 24px;
-            flex: 1;
-        }
+        .line-body { padding-right: 24px; flex: 1; }
 
-        /* Syntax colors */
-        .tok-comment  { color: #3d3d3d; }
-        .tok-kw       { color: #c0392b; }
-        .tok-type     { color: #8e5fc5; }
-        .tok-num      { color: #e67e22; }
-        .tok-str      { color: #27ae60; }
-        .tok-pp       { color: #2980b9; }
-        .tok-name     { color: #efefef; }
+        .tok-comment { color: #3d3d3d; }
+        .tok-kw      { color: #c0392b; }
+        .tok-type    { color: #8e5fc5; }
+        .tok-num     { color: #e67e22; }
+        .tok-str     { color: #27ae60; }
+        .tok-pp      { color: #2980b9; }
+        .tok-name    { color: #efefef; }
 
-        /* Loading / error states */
         .state-msg {
             display: flex;
             align-items: center;
@@ -237,7 +215,6 @@
             animation: spin 0.8s linear infinite;
         }
 
-        /* ── Footer ── */
         .footer {
             margin-top: 40px;
             display: flex;
@@ -255,9 +232,7 @@
             from { opacity: 0; transform: translateY(12px); }
             to   { opacity: 1; transform: translateY(0); }
         }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -281,7 +256,13 @@
                 <span class="status-dot" id="status-dot"></span>
                 <span id="status-text">fetching</span>
             </div>
-            <button class="btn-copy" id="copy-btn" onclick="copyCode()">
+            <a class="btn" href="https://offsets.ntgetwritewatch.workers.dev/offsets.hpp" target="_blank" rel="noopener">
+                <svg width="11" height="11" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 6H9M7 4L9 6L7 8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Raw
+            </a>
+            <button class="btn" id="copy-btn" onclick="copyCode()">
                 <svg width="11" height="11" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <rect x="4" y="4" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.2"/>
                     <path d="M3 8H2C1.44772 8 1 7.55228 1 7V2C1 1.44772 1.44772 1 2 1H7C7.55228 1 8 1.44772 8 2V3" stroke="currentColor" stroke-width="1.2"/>
@@ -327,38 +308,27 @@
 
         function tokenizeLine(raw) {
             const esc = escapeHtml(raw);
-
-            // Full-line comment
             if (/^\s*\/\//.test(raw)) return `<span class="tok-comment">${esc}</span>`;
-
-            // Preprocessor
-            if (/^\s*#/.test(raw)) return `<span class="tok-pp">${esc}</span>`;
+            if (/^\s*#/.test(raw))   return `<span class="tok-pp">${esc}</span>`;
 
             return esc
-                // Inline comments
                 .replace(/(\/\/.*$)/gm, '<span class="tok-comment">$1</span>')
-                // Keywords
                 .replace(/\b(namespace|struct|class|const|constexpr|inline|static|extern|auto|void|return|using|template|typename|if|else|for|while|do|break|continue|new|delete|nullptr|true|false|public|private|protected|virtual|override|final)\b/g,
                     '<span class="tok-kw">$1</span>')
-                // Types
                 .replace(/\b(uintptr_t|uint8_t|uint16_t|uint32_t|uint64_t|int8_t|int16_t|int32_t|int64_t|size_t|ptrdiff_t|bool|int|float|double|char|short|long|unsigned|signed|DWORD|BYTE|WORD|QWORD)\b/g,
                     '<span class="tok-type">$1</span>')
-                // Hex / numeric literals
                 .replace(/\b(0x[0-9a-fA-F]+|\d+(?:\.\d+)?(?:[uUlLfF]+)?)\b/g,
                     '<span class="tok-num">$1</span>')
-                // Strings
                 .replace(/(&quot;[^&]*?&quot;)/g, '<span class="tok-str">$1</span>');
         }
 
         function renderCode(text) {
             const lines = text.split('\n');
             const pad = String(lines.length).length;
-
             const html = lines.map((line, i) => {
                 const num = String(i + 1).padStart(pad, ' ');
                 return `<div class="code-line"><span class="line-num">${num}</span><span class="line-body">${tokenizeLine(line)}</span></div>`;
             }).join('');
-
             document.getElementById('code-block').innerHTML = html;
             document.getElementById('line-count').textContent = `${lines.length} lines`;
         }
@@ -367,8 +337,8 @@
             const dot  = document.getElementById('status-dot');
             const text = document.getElementById('status-text');
             dot.className = 'status-dot';
-            if (state === 'live')  { dot.classList.add('live');  text.textContent = 'live'; }
-            if (state === 'error') { dot.classList.add('error'); text.textContent = 'error'; }
+            if (state === 'live')    { dot.classList.add('live');  text.textContent = 'live'; }
+            if (state === 'error')   { dot.classList.add('error'); text.textContent = 'error'; }
             if (state === 'loading') { text.textContent = 'fetching'; }
         }
 
@@ -378,13 +348,10 @@
                 const res = await fetch(SOURCE);
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 rawContent = await res.text();
-
                 renderCode(rawContent);
                 setStatus('live');
-
                 const now = new Date();
-                document.getElementById('footer-ts').textContent =
-                    now.toUTCString().replace('GMT', 'UTC');
+                document.getElementById('footer-ts').textContent = now.toUTCString().replace('GMT', 'UTC');
             } catch (err) {
                 setStatus('error');
                 document.getElementById('code-block').innerHTML =
