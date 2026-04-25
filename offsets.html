@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>offsets.hpp — P90 API</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --red:      #c0392b;
+            --red-soft: rgba(192, 57, 43, 0.08);
+            --bg:       #0c0c0c;
+            --surface:  #141414;
+            --border:   rgba(255,255,255,0.07);
+            --text:     #a0a0a0;
+            --white:    #efefef;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 60px 24px;
+        }
+
+        /* ── Back nav ── */
+        .nav {
+            width: 100%;
+            max-width: 900px;
+            margin-bottom: 40px;
+            animation: up 0.35s cubic-bezier(.22,.68,0,1.2) both;
+        }
+        .nav a {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            color: #444;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .nav a:hover { color: var(--red); }
+        .nav a svg { width: 12px; height: 12px; }
+
+        /* ── Header ── */
+        .header {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 24px;
+            animation: up 0.4s cubic-bezier(.22,.68,0,1.2) both;
+            animation-delay: 0.05s;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .badge {
+            font-family: 'DM Mono', monospace;
+            font-size: 10px;
+            font-weight: 500;
+            color: var(--red);
+            background: var(--red-soft);
+            border: 1px solid rgba(192,57,43,0.2);
+            border-radius: 4px;
+            padding: 3px 8px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .filename {
+            font-family: 'DM Mono', monospace;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--white);
+            letter-spacing: -0.01em;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-copy {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            color: #555;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 6px 14px;
+            cursor: pointer;
+            transition: color 0.2s, border-color 0.2s;
+        }
+        .btn-copy:hover { color: var(--white); border-color: rgba(255,255,255,0.15); }
+        .btn-copy.copied { color: #2ecc71; border-color: rgba(46,204,113,0.3); }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            padding: 4px 12px;
+            font-family: 'DM Mono', monospace;
+            font-size: 10px;
+            color: #444;
+        }
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #555;
+            transition: background 0.3s;
+        }
+        .status-dot.live   { background: #2ecc71; box-shadow: 0 0 0 2px rgba(46,204,113,0.2); }
+        .status-dot.error  { background: #e74c3c; }
+
+        /* ── Code viewer ── */
+        .viewer-wrap {
+            width: 100%;
+            max-width: 900px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            animation: up 0.45s cubic-bezier(.22,.68,0,1.2) both;
+            animation-delay: 0.12s;
+        }
+
+        .viewer-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .viewer-dots {
+            display: flex;
+            gap: 6px;
+        }
+        .viewer-dots span {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #222;
+        }
+
+        .viewer-meta {
+            font-family: 'DM Mono', monospace;
+            font-size: 10px;
+            color: #333;
+            letter-spacing: 0.04em;
+        }
+
+        #code-container {
+            position: relative;
+            overflow-x: auto;
+        }
+
+        #code-block {
+            display: block;
+            font-family: 'DM Mono', monospace;
+            font-size: 12.5px;
+            line-height: 1.75;
+            color: #c9c9c9;
+            padding: 24px 0;
+            min-height: 200px;
+            white-space: pre;
+            tab-size: 4;
+        }
+
+        /* Line numbers layout */
+        .code-line {
+            display: flex;
+            align-items: baseline;
+        }
+        .line-num {
+            user-select: none;
+            min-width: 52px;
+            padding: 0 16px 0 24px;
+            color: #2a2a2a;
+            text-align: right;
+            flex-shrink: 0;
+        }
+        .line-body {
+            padding-right: 24px;
+            flex: 1;
+        }
+
+        /* Syntax colors */
+        .tok-comment  { color: #3d3d3d; }
+        .tok-kw       { color: #c0392b; }
+        .tok-type     { color: #8e5fc5; }
+        .tok-num      { color: #e67e22; }
+        .tok-str      { color: #27ae60; }
+        .tok-pp       { color: #2980b9; }
+        .tok-name     { color: #efefef; }
+
+        /* Loading / error states */
+        .state-msg {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            height: 180px;
+            font-family: 'DM Mono', monospace;
+            font-size: 12px;
+            color: #333;
+        }
+        .spinner {
+            width: 14px;
+            height: 14px;
+            border: 1.5px solid #2a2a2a;
+            border-top-color: #555;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        /* ── Footer ── */
+        .footer {
+            margin-top: 40px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            color: #1f1f1f;
+            animation: up 0.5s cubic-bezier(.22,.68,0,1.2) both;
+            animation-delay: 0.2s;
+        }
+        .footer-divider { width: 1px; height: 10px; background: #1a1a1a; }
+
+        @keyframes up {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="nav">
+        <a href="index.html">
+            <svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 2L4 6L8 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Back to API
+        </a>
+    </div>
+
+    <div class="header">
+        <div class="file-info">
+            <span class="badge">HPP</span>
+            <span class="filename">offsets.hpp</span>
+        </div>
+        <div class="header-actions">
+            <div class="status-pill">
+                <span class="status-dot" id="status-dot"></span>
+                <span id="status-text">fetching</span>
+            </div>
+            <button class="btn-copy" id="copy-btn" onclick="copyCode()">
+                <svg width="11" height="11" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="4" y="4" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.2"/>
+                    <path d="M3 8H2C1.44772 8 1 7.55228 1 7V2C1 1.44772 1.44772 1 2 1H7C7.55228 1 8 1.44772 8 2V3" stroke="currentColor" stroke-width="1.2"/>
+                </svg>
+                Copy
+            </button>
+        </div>
+    </div>
+
+    <div class="viewer-wrap">
+        <div class="viewer-toolbar">
+            <div class="viewer-dots">
+                <span></span><span></span><span></span>
+            </div>
+            <div class="viewer-meta" id="line-count"></div>
+        </div>
+        <div id="code-container">
+            <pre id="code-block">
+                <div class="state-msg"><div class="spinner"></div>Loading offsets…</div>
+            </pre>
+        </div>
+    </div>
+
+    <div class="footer">
+        <span>P90 API</span>
+        <span class="footer-divider"></span>
+        <span>offsets.hpp</span>
+        <span class="footer-divider"></span>
+        <span id="footer-ts"></span>
+    </div>
+
+    <script>
+        const SOURCE = 'https://offsets.ntgetwritewatch.workers.dev/offsets.hpp';
+
+        let rawContent = '';
+
+        function escapeHtml(str) {
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+
+        function tokenizeLine(raw) {
+            const esc = escapeHtml(raw);
+
+            // Full-line comment
+            if (/^\s*\/\//.test(raw)) return `<span class="tok-comment">${esc}</span>`;
+
+            // Preprocessor
+            if (/^\s*#/.test(raw)) return `<span class="tok-pp">${esc}</span>`;
+
+            return esc
+                // Inline comments
+                .replace(/(\/\/.*$)/gm, '<span class="tok-comment">$1</span>')
+                // Keywords
+                .replace(/\b(namespace|struct|class|const|constexpr|inline|static|extern|auto|void|return|using|template|typename|if|else|for|while|do|break|continue|new|delete|nullptr|true|false|public|private|protected|virtual|override|final)\b/g,
+                    '<span class="tok-kw">$1</span>')
+                // Types
+                .replace(/\b(uintptr_t|uint8_t|uint16_t|uint32_t|uint64_t|int8_t|int16_t|int32_t|int64_t|size_t|ptrdiff_t|bool|int|float|double|char|short|long|unsigned|signed|DWORD|BYTE|WORD|QWORD)\b/g,
+                    '<span class="tok-type">$1</span>')
+                // Hex / numeric literals
+                .replace(/\b(0x[0-9a-fA-F]+|\d+(?:\.\d+)?(?:[uUlLfF]+)?)\b/g,
+                    '<span class="tok-num">$1</span>')
+                // Strings
+                .replace(/(&quot;[^&]*?&quot;)/g, '<span class="tok-str">$1</span>');
+        }
+
+        function renderCode(text) {
+            const lines = text.split('\n');
+            const pad = String(lines.length).length;
+
+            const html = lines.map((line, i) => {
+                const num = String(i + 1).padStart(pad, ' ');
+                return `<div class="code-line"><span class="line-num">${num}</span><span class="line-body">${tokenizeLine(line)}</span></div>`;
+            }).join('');
+
+            document.getElementById('code-block').innerHTML = html;
+            document.getElementById('line-count').textContent = `${lines.length} lines`;
+        }
+
+        function setStatus(state) {
+            const dot  = document.getElementById('status-dot');
+            const text = document.getElementById('status-text');
+            dot.className = 'status-dot';
+            if (state === 'live')  { dot.classList.add('live');  text.textContent = 'live'; }
+            if (state === 'error') { dot.classList.add('error'); text.textContent = 'error'; }
+            if (state === 'loading') { text.textContent = 'fetching'; }
+        }
+
+        async function loadOffsets() {
+            setStatus('loading');
+            try {
+                const res = await fetch(SOURCE);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                rawContent = await res.text();
+
+                renderCode(rawContent);
+                setStatus('live');
+
+                const now = new Date();
+                document.getElementById('footer-ts').textContent =
+                    now.toUTCString().replace('GMT', 'UTC');
+            } catch (err) {
+                setStatus('error');
+                document.getElementById('code-block').innerHTML =
+                    `<div class="state-msg" style="color:#555;">Failed to load — ${escapeHtml(err.message)}</div>`;
+                document.getElementById('line-count').textContent = '';
+            }
+        }
+
+        function copyCode() {
+            if (!rawContent) return;
+            navigator.clipboard.writeText(rawContent).then(() => {
+                const btn = document.getElementById('copy-btn');
+                btn.textContent = 'Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.innerHTML = `<svg width="11" height="11" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="4" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M3 8H2C1.44772 8 1 7.55228 1 7V2C1 1.44772 1.44772 1 2 1H7C7.55228 1 8 1.44772 8 2V3" stroke="currentColor" stroke-width="1.2"/></svg> Copy`;
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        loadOffsets();
+    </script>
+
+</body>
+</html>
