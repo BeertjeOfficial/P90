@@ -30,7 +30,6 @@
             padding: 60px 24px;
         }
 
-        /* ── Status pill ── */
         .status {
             display: inline-flex;
             align-items: center;
@@ -53,7 +52,6 @@
             box-shadow: 0 0 0 2px rgba(46,204,113,0.2);
         }
 
-        /* ── Hero ── */
         .hero {
             text-align: center;
             margin-bottom: 72px;
@@ -65,46 +63,23 @@
             color: var(--white);
             line-height: 1.1;
             letter-spacing: -0.03em;
-            margin-bottom: 16px;
         }
         .hero h1 em {
             font-style: normal;
             color: var(--red);
         }
-        .hero p {
-            font-size: 15px;
-            font-weight: 300;
-            color: #555;
-            line-height: 1.7;
-        }
-
-        /* ── Cards ── */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            width: 100%;
-            max-width: 860px;
-        }
-        @media (max-width: 680px) {
-            .grid { grid-template-columns: 1fr 1fr; }
-        }
-        @media (max-width: 420px) {
-            .grid { grid-template-columns: 1fr; }
-        }
 
         a.card {
             text-decoration: none;
             display: block;
-        }
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 10px;
             padding: 28px 24px;
+            width: 280px;
             transition: border-color 0.2s, background 0.2s;
-            cursor: default;
         }
-        .card:hover {
+        a.card:hover {
             border-color: rgba(192,57,43,0.4);
             background: #181818;
         }
@@ -133,29 +108,11 @@
             font-weight: 400;
         }
 
-        /* ── Footer ── */
-        .footer {
-            margin-top: 60px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-family: 'DM Mono', monospace;
-            font-size: 11px;
-            color: #2a2a2a;
-        }
-        .footer-divider {
-            width: 1px;
-            height: 10px;
-            background: #222;
-        }
-
-        /* Fade in */
-        .status, .hero, .grid, .footer {
+        .status, .hero, a.card {
             animation: up 0.45s cubic-bezier(.22,.68,0,1.2) both;
         }
-        .hero   { animation-delay: 0.08s; }
-        .grid   { animation-delay: 0.16s; }
-        .footer { animation-delay: 0.22s; }
+        .hero  { animation-delay: 0.08s; }
+        a.card { animation-delay: 0.16s; }
 
         @keyframes up {
             from { opacity: 0; transform: translateY(12px); }
@@ -172,50 +129,13 @@
 
     <div class="hero">
         <h1>The <em>P90</em> API</h1>
-
     </div>
 
-    <div class="grid">
-
-        <a href="offsets.html" class="card">
-            <div class="card-label">HPP</div>
-            <div class="card-title">offsets.hpp</div>
-            <div class="card-desc">C++ header file format for legacy projects</div>
-        </a>
-
-        <div class="card">
-            <div class="card-label">HPP</div>
-            <div class="card-title">offsets_structured.hpp</div>
-            <div class="card-desc">Structured header for cleaner C++ integration</div>
-        </div>
-
-        <div class="card">
-            <div class="card-label">JSON</div>
-            <div class="card-title">offsets.json</div>
-            <div class="card-desc">Universal JSON format for any language or toolchain</div>
-        </div>
-
-        <div class="card">
-            <div class="card-label">HPP</div>
-            <div class="card-title">fflags.hpp</div>
-            <div class="card-desc">FastFlag addresses for engine config and feature toggles</div>
-        </div>
-
-        <div class="card">
-            <div class="card-label">INFO</div>
-            <div class="card-title">Version</div>
-            <div class="card-desc">Current build version and update history</div>
-        </div>
-
-        <div class="card">
-            <div class="card-label">INT</div>
-            <div class="card-title">Internal Offsets</div>
-            <div class="card-desc">Internal game offsets for advanced integrations</div>
-        </div>
-
-    </div>
-
-
+    <a href="offsets.html" class="card">
+        <div class="card-label">HPP</div>
+        <div class="card-title">offsets.hpp</div>
+        <div class="card-desc">C++ header file format for legacy projects</div>
+    </a>
 
 </body>
 </html>
